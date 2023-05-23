@@ -27,7 +27,6 @@ app.use("/api/users", userRouter);
 app.use("/api/orders", orderRouter);
 app.use("/api/admin",adminRouter);
 app.use("/checkout",checkoutRouter);
-
 const port=5000
 const server = app.listen(port,()=>{
     console.log("Website Served on http://localhost:"+port);
