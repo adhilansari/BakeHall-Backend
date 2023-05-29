@@ -19,27 +19,28 @@ router.get("/seed", asyncHandler(
     }
 ));
 
+
 router.post("/login", asyncHandler(
     async (req, res) => {
-        const { email, password } = req.body
-        const user = await UserModel.findOne({ email, password })
-        if (user) {
-            res.send(generateTokenResponse(user))
-        } else {
-            res.status(400).send("username or password not valid")
-        }
+      const {email, password} = req.body;
+      const user = await UserModel.findOne({email});
+    
+       if(user && (await bcrypt.compare(password,user.password))) {
+        res.send(generateTokenResponse(user));
+       }
+       else{
+         res.status(400).send("Username or password is invalid!");
+       }
+    
     }
-));
+  ))
 
 router.post('/register', asyncHandler(
-    async (req, res) => {
+    async (req:any, res:any) => {
         const { name, email, password, address } = req.body
         const user = await UserModel.findOne({ email });
-        if (user && (await bcrypt.compare(password,user.password    ))) {
-            res.status(400).send('User is already exist, please login!')
-            return;
-        }
-
+        if (user) return res.status(400).send('User is already exist, please login!')
+            
         const encryptedPassword = await bcrypt.hash(password, 10);
 
         const newUser: User = {
