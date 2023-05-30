@@ -1,15 +1,15 @@
 
-import { Router, json } from "express";
+import { Request, Response, Router, json } from "express";
 import asyncHandler from 'express-async-handler'
 import { Food, FoodModel } from "../models/food.model";
-// import cloudinaryConfig from "../configs/cloudinary.config";
 import upload from '../middlewares/multer.mid'
-const cloudinary = require('../configs/cloudinary.config')
+// import { upload } from './../middlewares/multer.mid';
+
+const cloud = require('../configs/cloudinary.config')
+// import { cloud } from "../configs/cloudinary.config";
 
 
 const router =Router();
-
-
 //get all foods
 router.get('/',asyncHandler(
     async (req,res)=>{
@@ -19,17 +19,21 @@ router.get('/',asyncHandler(
 ));
 
 
-router.post('/image',upload.single('image'), asyncHandler(
-    async (req,res)=>{
+router.post('/image',upload.single('file'), asyncHandler(
+    async (req:Request,res:Response)=>{
+
+        const {file, body} = req;
+        console.log(file, body);
+
         try {
-        const result = await cloudinary.uploader.upload(req.file?.path)
+            // console.log(req);
+            
+        const result = await cloud.uploader.upload(req.file?.path)
+        
         // console.log(req.file?.path,'file path');
         
         res.json(result)
-       const  images = result.secure_url
-    //    console.log(images,'image path');
-       
-            
+       const  images = result.secure_url            
         } catch (error) {
             console.log(error);
             
@@ -37,21 +41,19 @@ router.post('/image',upload.single('image'), asyncHandler(
     }
 ))
 
-
 //create food
-router.post('/food',upload.single('image'),asyncHandler(
-    async (req,res)=>{
-
+router.post('/food',upload.single('imgFile'),asyncHandler(
+    async (req:Request,res:Response)=>{
 
         try {
-            const { name, cookTime, price, tags,origins,imageUrl } =await req.body
-
             
-        
+            
+            const { name, cookTime, price, tags,origins } = await req.body
+
             // console.log(upload);        
-            const result = await cloudinary.uploader.upload(imageUrl.replace('c:\\fakepath\\','images/'));
+            // const result = await cloudinary.uploader.upload(imageUrl.replace('c:\\fakepath\\','images/'));
+            const result = await cloud.uploader.upload(req.file?.path);
             const images = result.secure_url
-            // console.log(images,'linklink');
             
     
     
@@ -66,18 +68,14 @@ router.post('/food',upload.single('image'),asyncHandler(
                 imageUrl:images,
                 origins,
                 cookTime
-            };
+            }
     
             const dbFood= await FoodModel.create(newFood)
             res.send(dbFood)
                 
             } catch (error) {
                 console.log(error);
-                
             }
-
-
-        
     }
 ));
 
@@ -90,7 +88,7 @@ router.delete('/food/:id',
         
         if(!food){
 			 res.status(404).json({message:`cannot find any Food with ID ${id}`});
-		}
+		}        
 		res.status(200).json(food)
     }
 );
