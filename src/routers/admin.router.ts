@@ -7,9 +7,8 @@ import upload from '../middlewares/multer.mid'
 
 const cloud = require('../configs/cloudinary.config')
 // import { cloud } from "../configs/cloudinary.config";
-
-
 const router =Router();
+
 //get all foods
 router.get('/',asyncHandler(
     async (req,res)=>{
@@ -17,7 +16,6 @@ router.get('/',asyncHandler(
         res.send(foods)
     }
 ));
-
 
 router.post('/image',upload.single('file'), asyncHandler(
     async (req:Request,res:Response)=>{
@@ -46,18 +44,9 @@ router.post('/food',upload.single('imgFile'),asyncHandler(
     async (req:Request,res:Response)=>{
 
         try {
-            
-            
             const { name, cookTime, price, tags,origins } = await req.body
-
-            // console.log(upload);        
-            // const result = await cloudinary.uploader.upload(imageUrl.replace('c:\\fakepath\\','images/'));
             const result = await cloud.uploader.upload(req.file?.path);
-            const images = result.secure_url
-            
-    
-    
-            
+            const images = result.secure_url;   
             const newFood:Food={
                 id:'',
                 name,
@@ -105,7 +94,5 @@ router.put('/food/:id',
 		res.status(200).json(updatedFood)
     }
 )
-
-
 
 export default router;
